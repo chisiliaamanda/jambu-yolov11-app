@@ -113,8 +113,12 @@ def detection_page():
                 image = Image.open(source_image)
                 st.image(image, caption="Gambar yang diunggah", use_container_width=True)
             else:
-                image = Image.open(DEFAULT_IMAGE)
-                st.image(image, caption="Gambar default", use_container_width=True)
+                if DEFAULT_IMAGE.exists():
+                    image = Image.open(DEFAULT_IMAGE)
+                    st.image(image, caption="Gambar default", use_container_width=True)
+                else:
+                    st.warning("❌ Gambar default tidak ditemukan.")
+                    return  # agar tidak lanjut ke pemanggilan predict()
 
         with col2:
             if st.sidebar.button("🔍 Deteksi Objek"):
