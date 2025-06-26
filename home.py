@@ -143,19 +143,20 @@ def detection_page():
             cap.release()
 
     elif input_mode == "Camera":
-        run = st.checkbox("📸 Jalankan Kamera")
-        FRAME_WINDOW = st.image([])
-        cap = cv2.VideoCapture(0)
-        if not cap.isOpened():
-            st.error("Kamera tidak terdeteksi.")
-        while run:
-            ret, frame = cap.read()
-            if not ret:
-                break
-            result = model(frame[..., ::-1], conf=confidence)
-            output = result[0].plot()
-            FRAME_WINDOW.image(output, channels="RGB")
-        cap.release()
+        camera_img = st.camera_input("📷 Ambil foto dari kamera")
+        if camera_img:
+            img = Image.open(camera_img)
+            result = model.predict(img, conf=confidence)
+            plotted = result[0].plot()[:, :, ::-1]
+            st.image(plotted, caption="Hasil Deteksi", use_column_width=True)
+
+            # Simpan ke history
+            st.session_state.history.append({
+                'type': 'Camera',
+                'input_img': np.array(img.convert("RGB")).tolist(),
+                'result_img': plotted.tolist(),
+                'labels': [model.names[int(box.cls[0].item())] for box in result[0].boxes]
+            })
 
 def history_page():
     st.title("📜 Riwayat Deteksi")
