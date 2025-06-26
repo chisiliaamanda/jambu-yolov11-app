@@ -251,7 +251,7 @@ else:
             [data-testid="stSidebar"] {background-color:#FFA62F; color:#000;}
             </style>""", unsafe_allow_html=True)
 
-        st.sidebar.image("images/poon.png", use_column_width=True)
+        st.sidebar.image("images/jambu1.jpg", use_column_width=True)
 
     if __name__ == "__main__" or True:
         main()
