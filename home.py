@@ -50,7 +50,13 @@ def home_page():
     2. Scab → bercak kasar di kulit  
     3. Styler and Root → gangguan bunga & akar
     """)
-    st.image("images/jambu2.jpg", caption="Contoh Jambu Biji", use_container_width=True)
+from pathlib import Path
+
+image_path = Path("images/jambu2.jpg")
+if image_path.exists():
+    st.image(str(image_path), caption="Contoh Jambu Biji", use_container_width=True)
+else:
+    st.warning("⚠️ Gambar 'jambu2.jpg' tidak ditemukan.")
 
 def detection_page():
     st.title("🔍 Deteksi Penyakit Jambu")
