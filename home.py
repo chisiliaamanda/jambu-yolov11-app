@@ -50,7 +50,7 @@ def home_page():
     2. Scab → bercak kasar di kulit  
     3. Styler and Root → gangguan bunga & akar
     """)
-    st.image("images/jambu1.jpg", caption="Contoh Jambu Biji", use_column_width=True)
+    st.image("images/jambu1.jpg", caption="Contoh Jambu Biji", use_container_width=True)
 
 def detection_page():
     st.title("🔍 Deteksi Penyakit Jambu")
@@ -102,14 +102,14 @@ def detection_page():
             else:
                 st.warning("Tidak ada gambar.")
                 return
-            st.image(img, caption="Gambar Input", use_column_width=True)
+            st.image(img, caption="Gambar Input", use_container_width=True)
 
         with col2:
             if st.sidebar.button("🔎 Deteksi Objek"):
                 result = model.predict(img, conf=confidence)
                 boxes = result[0].boxes
                 hasil = result[0].plot()[:, :, ::-1]
-                st.image(hasil, caption="Hasil Deteksi", use_column_width=True)
+                st.image(hasil, caption="Hasil Deteksi", use_container_width=True)
 
                 detected_labels = []
                 for box in boxes:
@@ -148,7 +148,7 @@ def detection_page():
             img = Image.open(camera_img)
             result = model.predict(img, conf=confidence)
             plotted = result[0].plot()[:, :, ::-1]
-            st.image(plotted, caption="Hasil Deteksi", use_column_width=True)
+            st.image(plotted, caption="Hasil Deteksi", use_container_width=True)
 
             # Simpan ke history
             st.session_state.history.append({
