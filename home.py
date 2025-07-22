@@ -60,7 +60,6 @@ def detection_page():
     JSON_PATH = ROOT / 'penyakit_jambu_info.json'
 
     DEFAULT_IMAGE = IMAGES_DIR / 'jambu2.jpg'
-    DEFAULT_RESULT = IMAGES_DIR / 'detectedimage1.png'
     DETECTION_MODEL = MODEL_DIR / 'best.pt'
 
     confidence = st.sidebar.slider("Confidence", 10, 100, 25) / 100
@@ -94,17 +93,25 @@ def detection_page():
         col1, col2 = st.columns(2)
 
         with col1:
+            img = None
             if uploaded:
                 img = Image.open(uploaded)
             elif DEFAULT_IMAGE.exists():
-                img = Image.open(DEFAULT_IMAGE)
+                try:
+                    img = Image.open(DEFAULT_IMAGE)
+                except:
+                    st.warning("⚠️ Gagal memuat gambar default.")
+                    img = None
             else:
-                st.warning("Tidak ada gambar.")
-                return
-            st.image(img, caption="Gambar Input", use_container_width=True)
+                st.warning("⚠️ Gambar default tidak tersedia.")
+            
+            if isinstance(img, Image.Image):
+                st.image(img, caption="Gambar Input", use_container_width=True)
+            else:
+                st.error("❌ Tidak ada gambar untuk ditampilkan.")
 
         with col2:
-            if st.sidebar.button("🔎 Deteksi Objek"):
+            if img and st.sidebar.button("🔎 Deteksi Objek"):
                 result = model.predict(img, conf=confidence)
                 boxes = result[0].boxes
                 hasil = result[0].plot()[:, :, ::-1]
@@ -149,7 +156,6 @@ def detection_page():
             plotted = result[0].plot()[:, :, ::-1]
             st.image(plotted, caption="Hasil Deteksi", use_container_width=True)
 
-            # Simpan ke history
             st.session_state.history.append({
                 'type': 'Camera',
                 'input_img': np.array(img.convert("RGB")).tolist(),
