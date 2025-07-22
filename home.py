@@ -51,6 +51,7 @@ def home_page():
     3. Styler and Root → gangguan bunga & akar
     """)
 
+
 def detection_page():
     st.title("🔍 Deteksi Penyakit Jambu")
 
@@ -60,13 +61,14 @@ def detection_page():
     JSON_PATH = ROOT / 'penyakit_jambu_info.json'
 
     DEFAULT_IMAGE = IMAGES_DIR / 'jambu2.jpg'
+    DEFAULT_RESULT = IMAGES_DIR / 'detectedimage1.png'
     DETECTION_MODEL = MODEL_DIR / 'best.pt'
 
     confidence = st.sidebar.slider("Confidence", 10, 100, 25) / 100
     input_mode = st.sidebar.radio("Sumber Gambar", ["Image", "Video", "Camera"])
 
     try:
-        model = YOLO(str(DETECTION_MODEL))
+        model = YOLO(DETECTION_MODEL)
         st.sidebar.success("✅ Model berhasil dimuat")
     except Exception as e:
         st.error(f"❌ Gagal memuat model: {e}")
@@ -93,27 +95,17 @@ def detection_page():
         col1, col2 = st.columns(2)
 
         with col1:
-            img = None
             if uploaded:
-                try:
-                    img = Image.open(uploaded)
-                except Exception as e:
-                    st.error(f"Gagal membuka gambar: {e}")
+                img = Image.open(uploaded)
             elif DEFAULT_IMAGE.exists():
-                try:
-                    img = Image.open(DEFAULT_IMAGE)
-                except:
-                    st.warning("⚠️ Gagal memuat gambar default.")
+                img = Image.open(DEFAULT_IMAGE)
             else:
-                st.warning("⚠️ Gambar default tidak tersedia.")
-            
-            if isinstance(img, Image.Image):
-                st.image(img, caption="Gambar Input", use_container_width=True)
-            else:
-                st.error("❌ Tidak ada gambar untuk ditampilkan.")
+                st.warning("Tidak ada gambar.")
+                return
+            st.image(img, caption="Gambar Input", use_container_width=True)
 
         with col2:
-            if isinstance(img, Image.Image) and st.sidebar.button("🔎 Deteksi Objek"):
+            if st.sidebar.button("🔎 Deteksi Objek"):
                 result = model.predict(img, conf=confidence)
                 boxes = result[0].boxes
                 hasil = result[0].plot()[:, :, ::-1]
@@ -153,20 +145,18 @@ def detection_page():
     elif input_mode == "Camera":
         camera_img = st.camera_input("📷 Ambil foto dari kamera")
         if camera_img:
-            try:
-                img = Image.open(camera_img)
-                result = model.predict(img, conf=confidence)
-                plotted = result[0].plot()[:, :, ::-1]
-                st.image(plotted, caption="Hasil Deteksi", use_container_width=True)
+            img = Image.open(camera_img)
+            result = model.predict(img, conf=confidence)
+            plotted = result[0].plot()[:, :, ::-1]
+            st.image(plotted, caption="Hasil Deteksi", use_container_width=True)
 
-                st.session_state.history.append({
-                    'type': 'Camera',
-                    'input_img': np.array(img.convert("RGB")).tolist(),
-                    'result_img': plotted.tolist(),
-                    'labels': [model.names[int(box.cls[0].item())] for box in result[0].boxes]
-                })
-            except Exception as e:
-                st.error(f"Gagal memproses kamera: {e}")
+            # Simpan ke history
+            st.session_state.history.append({
+                'type': 'Camera',
+                'input_img': np.array(img.convert("RGB")).tolist(),
+                'result_img': plotted.tolist(),
+                'labels': [model.names[int(box.cls[0].item())] for box in result[0].boxes]
+            })
 
 def history_page():
     st.title("📜 Riwayat Deteksi")
