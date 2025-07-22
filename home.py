@@ -50,7 +50,7 @@ def home_page():
     2. Scab → bercak kasar di kulit  
     3. Styler and Root → gangguan bunga & akar
     """)
-    st.image("images/jambu1.jpg", caption="Contoh Jambu Biji", use_container_width=True)
+    st.image("images/jambu2.jpg", caption="Contoh Jambu Biji", use_container_width=True)
 
 def detection_page():
     st.title("🔍 Deteksi Penyakit Jambu")
