@@ -60,7 +60,7 @@ def detection_page():
     MODEL_DIR = ROOT / 'weights'
     JSON_PATH = ROOT / 'penyakit_jambu_info.json'
 
-    DEFAULT_IMAGE = IMAGES_DIR / 'jambu1.jpg'
+    DEFAULT_IMAGE = IMAGES_DIR / 'jambu2.jpg'
     DEFAULT_RESULT = IMAGES_DIR / 'detectedimage1.png'
     DETECTION_MODEL = MODEL_DIR / 'best.pt'
 
