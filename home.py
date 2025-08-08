@@ -280,10 +280,19 @@ def detection_page():
                 image_path = os.path.join(RIWAYAT_FOLDER, filename)
                 image.save(image_path)
 
+                # Debugging: Check values before calling simpan_riwayat
+                st.write("Debugging: user_id =", st.session_state['user_id'])
+                st.write("Debugging: filename =", filename)
+                st.write("Debugging: hasil_deteksi =", hasil_deteksi)
+                st.write("Debugging: timestamp =", timestamp)
+
                 # Simpan riwayat ke database
-                if 'user_id' in st.session_state:
-                    simpan_riwayat(st.session_state['user_id'], filename, hasil_deteksi, timestamp)
-                    st.info("Riwayat deteksi telah disimpan.")
+                try:
+                    if 'user_id' in st.session_state:
+                        simpan_riwayat(st.session_state['user_id'], filename, hasil_deteksi, timestamp)
+                        st.info("Riwayat deteksi telah disimpan.")
+                except Exception as e:
+                    st.error(f"Terjadi kesalahan saat menyimpan riwayat: {e}")
 
 # History page content
 def history_page():
