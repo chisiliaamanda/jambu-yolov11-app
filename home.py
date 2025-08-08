@@ -167,17 +167,36 @@ def register_page():
 # Home page content
 def home_page():
     st.title("🌳 Guava Disease Detector")
+    st.markdown("""<style>.big-font { font-size:20px !important; }</style>""", unsafe_allow_html=True)
+    st.markdown('<div class="big-font">Selamat datang di <b>Guava Disease Detector</b>! Aplikasi ini dirancang untuk membantu Anda mengidentifikasi penyakit pada buah <b>jambu biji</b> secara otomatis menggunakan teknologi <i>YOLOv11</i>.</div>', unsafe_allow_html=True)
 
-    if 'user_id' not in st.session_state:
-        page = st.selectbox("Pilih halaman", ["Login", "Register"])
-        if page == "Login":
-            login_page()
-        elif page == "Register":
-            register_page()
-    else:
-        st.markdown("Selamat datang! Anda telah login.")
-        st.markdown("Pilih menu berikut:")
-        st.radio("Menu", ["Detection", "History"])
+    st.image("images/detection.png", caption="Contoh Deteksi Penyakit pada Jambu Biji", width=600)
+
+    st.subheader("🧠 Tentang Aplikasi")
+    st.write("""Aplikasi berbasis web yang memanfaatkan model YOLOv11 untuk mendeteksi penyakit pada permukaan buah jambu biji. Sistem mendukung input dari gambar maupun kamera.""")
+
+    st.subheader("🔍 Fitur Utama")
+    st.markdown("""
+    - ✅ Deteksi cepat dan akurat menggunakan YOLOv11.
+    - 🖼️ Tampilan hasil deteksi dengan bounding box dan confidence.
+    - 🕒 Riwayat deteksi tersimpan per pengguna.
+    """)
+
+    st.subheader("📌 Cara Menggunakan")
+    st.markdown("""
+    1. Masuk ke menu **🔍 Deteksi**.
+    2. Pilih metode input: upload atau kamera.
+    3. Jalankan deteksi dan lihat hasilnya.
+    4. Cek kembali melalui menu **📜 Riwayat**.
+    """)
+
+    st.subheader("📞 Tentang Pengembang")
+    st.markdown("""
+    - 👩‍💻 **Nama**: Chisilia Amanda  
+    - 🏫 **Universitas**: Universitas Gunadarma  
+    - 📧 **Email**: chisiliaamanda123@gmail.com  
+    - 🗂️ **GitHub**: [chisiliaamanda/guava-disease-detector](https://github.com/chisiliaamanda/guava-disease-detector)
+    """)
 
 # Detection page content
 def detection_page():
