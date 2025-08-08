@@ -8,7 +8,6 @@ from ultralytics import YOLO
 import os
 import numpy as np
 import tempfile
-import database  # Pastikan kamu memiliki modul ini
 
 # Fungsi koneksi ke database
 def connect():
@@ -137,10 +136,7 @@ def home_page():
     st.image("images/detection.png", caption="Contoh Deteksi Penyakit pada Jambu Biji", width=600)
 
     st.subheader("🧠 Tentang Aplikasi")
-    st.write("""
-    Aplikasi berbasis web yang memanfaatkan model YOLOv11 untuk mendeteksi penyakit pada permukaan buah jambu biji. 
-    Sistem mendukung input dari gambar maupun kamera.
-    """)
+    st.write("""Aplikasi berbasis web yang memanfaatkan model YOLOv11 untuk mendeteksi penyakit pada permukaan buah jambu biji. Sistem mendukung input dari gambar maupun kamera.""")
 
     st.subheader("🔍 Fitur Utama")
     st.markdown("""
