@@ -53,12 +53,15 @@ def home_page():
     2. Scab → bercak kasar di kulit  
     3. Styler and Root → gangguan bunga & akar
     """)
+
     # Perbaiki path gambar
     img_path = Path(__file__).parent / "images" / "jambu2.jpg"
+    
+    # Cek apakah gambar ada dan jika ada tampilkan, jika tidak tampilkan pesan saja
     if img_path.exists():
         st.image(img_path, caption="Contoh Jambu Biji", use_container_width=True)
     else:
-        st.error("Gambar tidak ditemukan di path: images/jambu2.jpg")
+        st.warning("Gambar 'jambu2.jpg' tidak ditemukan di folder 'images'.")
 
 # Detection page content
 def detection_page():
