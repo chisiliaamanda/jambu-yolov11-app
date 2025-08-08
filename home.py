@@ -7,6 +7,7 @@ import cv2
 import tempfile
 import numpy as np
 
+# Function for styling the app with a girly theme
 def girly_style():
     st.markdown("""
     <style>
@@ -35,11 +36,13 @@ def girly_style():
     </style>
     """, unsafe_allow_html=True)
 
+# Sidebar header content
 def sidebar_header():
     st.sidebar.markdown("### Selamat datang 👋")
     st.sidebar.markdown("---")
     st.sidebar.caption("👩‍💻 Oleh Chisilia Amanda Wahyudi | Skripsi Deteksi Penyakit Jambu 🍈")
 
+# Home page content
 def home_page():
     st.title("🍈 Guava Disease Detection with YOLOv11")
     st.markdown("""
@@ -52,6 +55,7 @@ def home_page():
     """)
     st.image("images/jambu2.jpg", caption="Contoh Jambu Biji", use_container_width=True)
 
+# Detection page content
 def detection_page():
     st.title("🔍 Deteksi Penyakit Jambu")
 
@@ -158,6 +162,7 @@ def detection_page():
                 'labels': [model.names[int(box.cls[0].item())] for box in result[0].boxes]
             })
 
+# History page content
 def history_page():
     st.title("📜 Riwayat Deteksi")
     if 'history' not in st.session_state or not st.session_state.history:
@@ -171,6 +176,7 @@ def history_page():
             for label in item['labels']:
                 st.markdown(f"- {label}")
 
+# Main function to run the app
 def main():
     girly_style()
     sidebar_header()
@@ -182,5 +188,6 @@ def main():
     elif menu == "History":
         history_page()
 
+# Run the app
 if __name__ == "__main__":
     main()
