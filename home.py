@@ -6,6 +6,7 @@ from ultralytics import YOLO
 import cv2
 import tempfile
 import numpy as np
+import os
 
 # Function for styling the app with a girly theme
 def girly_style():
@@ -44,25 +45,48 @@ def sidebar_header():
 
 # Home page content
 def home_page():
-    st.title("🍈 Guava Disease Detection with YOLOv11")
+    st.title("🌳 Guava Disease Detector")
     st.markdown("""
-    Deteksi penyakit jambu biji secara otomatis menggunakan model YOLOv11.
+    <style>
+        .big-font {
+            font-size:20px !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
-    **Jenis penyakit:**
-    1. Phytophthora → busuk akar & batang  
-    2. Scab → bercak kasar di kulit  
-    3. Styler and Root → gangguan bunga & akar
+    st.markdown('<div class="big-font">Selamat datang di <b>Guava Disease Detector</b>! Aplikasi ini dirancang untuk membantu Anda mengidentifikasi penyakit pada buah <b>jambu biji</b> secara otomatis menggunakan teknologi <i>YOLOv11</i>.</div>', unsafe_allow_html=True)
+
+    st.image("images/detection.png", caption="Contoh Deteksi Penyakit pada Jambu Biji", width=600)
+
+    st.subheader("🧠 Tentang Aplikasi")
+    st.write("""
+    Aplikasi berbasis web yang memanfaatkan model YOLOv11 untuk mendeteksi penyakit pada permukaan buah jambu biji. 
+    Sistem mendukung input dari gambar maupun kamera.
     """)
 
-    # Perbaiki path gambar
-    img_path = Path(__file__).parent / "images" / "jambu2.jpg"
-    
-    # Cek apakah gambar ada dan jika ada tampilkan, jika tidak tampilkan pesan saja
-    if img_path.exists():
-        st.image(img_path, caption="Contoh Jambu Biji", use_container_width=True)
-    else:
-        st.warning("Gambar 'jambu2.jpg' tidak ditemukan di folder 'images'.")
+    st.subheader("🔍 Fitur Utama")
+    st.markdown("""
+    - ✅ Deteksi cepat dan akurat menggunakan YOLOv11.
+    - 🖼️ Tampilan hasil deteksi dengan bounding box dan confidence.
+    - 🕒 Riwayat deteksi tersimpan per pengguna.
+    """)
 
+    st.subheader("📌 Cara Menggunakan")
+    st.markdown("""
+    1. Masuk ke menu **🔍 Deteksi**.
+    2. Pilih metode input: upload atau kamera.
+    3. Jalankan deteksi dan lihat hasilnya.
+    4. Cek kembali melalui menu **📜 Riwayat**.
+    """)
+
+    st.subheader("📞 Tentang Pengembang")
+    st.markdown("""
+    - 👩‍💻 **Nama**: Chisilia Amanda  
+    - 🏫 **Universitas**: Universitas Gunadarma  
+    - 📧 **Email**: chisiliaamanda123@gmail.com  
+    - 🗂️ **GitHub**: [chisiliaamanda/guava-disease-detector](https://github.com/chisiliaamanda/guava-disease-detector)
+    """)
+    
 # Detection page content
 def detection_page():
     st.title("🔍 Deteksi Penyakit Jambu")
