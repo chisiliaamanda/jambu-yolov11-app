@@ -139,8 +139,9 @@ def login_page():
         user_id = login_user(username, password)
         if user_id:
             st.session_state['user_id'] = user_id
+            st.session_state.logged_in = True  # Menambahkan session_state sebagai flag
             st.success("Login berhasil!")
-            st.experimental_rerun()  # Refresh untuk akses ke halaman Deteksi
+            st.rerun()  # Refresh untuk akses ke halaman Deteksi
         else:
             st.error("Username atau Password salah.")
 
@@ -158,7 +159,7 @@ def register_page():
             if register_user(username, password):
                 st.success("Registrasi berhasil!")
                 st.session_state['user_id'] = login_user(username, password)  # Auto login setelah registrasi
-                st.experimental_rerun()  # Refresh untuk akses ke halaman Deteksi
+                st.rerun()  # Refresh untuk akses ke halaman Deteksi
             else:
                 st.error("Username sudah terdaftar.")
         else:
@@ -167,36 +168,49 @@ def register_page():
 # Home page content
 def home_page():
     st.title("🌳 Guava Disease Detector")
-    st.markdown("""<style>.big-font { font-size:20px !important; }</style>""", unsafe_allow_html=True)
-    st.markdown('<div class="big-font">Selamat datang di <b>Guava Disease Detector</b>! Aplikasi ini dirancang untuk membantu Anda mengidentifikasi penyakit pada buah <b>jambu biji</b> secara otomatis menggunakan teknologi <i>YOLOv11</i>.</div>', unsafe_allow_html=True)
 
-    st.image("images/detection.png", caption="Contoh Deteksi Penyakit pada Jambu Biji", width=600)
+    # Cek apakah sudah login
+    if 'user_id' not in st.session_state:
+        page = st.selectbox("Pilih halaman", ["Login", "Register"])
 
-    st.subheader("🧠 Tentang Aplikasi")
-    st.write("""Aplikasi berbasis web yang memanfaatkan model YOLOv11 untuk mendeteksi penyakit pada permukaan buah jambu biji. Sistem mendukung input dari gambar maupun kamera.""")
+        if page == "Login":
+            login_page()
+        elif page == "Register":
+            register_page()
+    else:
+        # Jika sudah login, tampilkan deskripsi aplikasi dan menu
+        # Setelah login, tampilkan menu untuk memilih halaman
+        st.markdown("""<style>.big-font { font-size:20px !important; }</style>""", unsafe_allow_html=True)
+        st.markdown('<div class="big-font">Selamat datang di <b>Guava Disease Detector</b>! Aplikasi ini dirancang untuk membantu Anda mengidentifikasi penyakit pada buah <b>jambu biji</b> secara otomatis menggunakan teknologi <i>YOLOv11</i>.</div>', unsafe_allow_html=True)
 
-    st.subheader("🔍 Fitur Utama")
-    st.markdown("""
-    - ✅ Deteksi cepat dan akurat menggunakan YOLOv11.
-    - 🖼️ Tampilan hasil deteksi dengan bounding box dan confidence.
-    - 🕒 Riwayat deteksi tersimpan per pengguna.
-    """)
+        st.image("images/detection.png", caption="Contoh Deteksi Penyakit pada Jambu Biji", width=600)
 
-    st.subheader("📌 Cara Menggunakan")
-    st.markdown("""
-    1. Masuk ke menu **🔍 Deteksi**.
-    2. Pilih metode input: upload atau kamera.
-    3. Jalankan deteksi dan lihat hasilnya.
-    4. Cek kembali melalui menu **📜 Riwayat**.
-    """)
+        st.subheader("🧠 Tentang Aplikasi")
+        st.write("""Aplikasi berbasis web yang memanfaatkan model YOLOv11 untuk mendeteksi penyakit pada permukaan buah jambu biji. Sistem mendukung input dari gambar maupun kamera.""")
 
-    st.subheader("📞 Tentang Pengembang")
-    st.markdown("""
-    - 👩‍💻 **Nama**: Chisilia Amanda  
-    - 🏫 **Universitas**: Universitas Gunadarma  
-    - 📧 **Email**: chisiliaamanda123@gmail.com  
-    - 🗂️ **GitHub**: [chisiliaamanda/guava-disease-detector](https://github.com/chisiliaamanda/guava-disease-detector)
-    """)
+        st.subheader("🔍 Fitur Utama")
+        st.markdown("""
+        - ✅ Deteksi cepat dan akurat menggunakan YOLOv11.
+        - 🖼️ Tampilan hasil deteksi dengan bounding box dan confidence.
+        - 🕒 Riwayat deteksi tersimpan per pengguna.
+        """)
+
+        st.subheader("📌 Cara Menggunakan")
+        st.markdown("""
+        1. Masuk ke menu **🔍 Deteksi**.
+        2. Pilih metode input: upload atau kamera.
+        3. Jalankan deteksi dan lihat hasilnya.
+        4. Cek kembali melalui menu **📜 Riwayat**.
+        """)
+
+        st.subheader("📞 Tentang Pengembang")
+        st.markdown("""
+        - 👩‍💻 **Nama**: Chisilia Amanda  
+        - 🏫 **Universitas**: Universitas Gunadarma  
+        - 📧 **Email**: chisiliaamanda123@gmail.com  
+        - 🗂️ **GitHub**: [chisiliaamanda/guava-disease-detector](https://github.com/chisiliaamanda/guava-disease-detector)
+        """)
+
 
 # Detection page content
 def detection_page():
@@ -294,11 +308,8 @@ def history_page():
 def main():
     girly_style()
     sidebar_header()
-    menu = st.sidebar.radio("📌 Menu", ["Login", "Home", "Detection", "History"])
-
-    if menu == "Login":
-        login_page()
-    elif menu == "Home":
+    menu = st.sidebar.radio("📌 Menu", ["Home", "Detection", "History"])
+    if menu == "Home":
         home_page()
     elif menu == "Detection":
         detection_page()
