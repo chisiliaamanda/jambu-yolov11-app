@@ -1,12 +1,97 @@
+import sqlite3
+from datetime import datetime
 import streamlit as st
 import json
 from pathlib import Path
 from PIL import Image
 from ultralytics import YOLO
-import cv2
-import tempfile
-import numpy as np
 import os
+import numpy as np
+import tempfile
+import database  # Pastikan kamu memiliki modul ini
+
+# Fungsi koneksi ke database
+def connect():
+    return sqlite3.connect("db_jambu.sqlite")
+
+# Membuat tabel jika belum ada
+def create_tables():
+    conn = connect()
+    c = conn.cursor()
+
+    # Tabel users
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT
+    )
+    """)
+
+    # Tabel riwayat (versi lengkap dengan image hasil deteksi dan rincian)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS riwayat (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        image_name TEXT,
+        image_detected TEXT,
+        hasil TEXT,
+        rincian TEXT,
+        waktu TEXT
+    )
+    """)
+
+    conn.commit()
+    conn.close()
+
+# Fungsi untuk registrasi user baru
+def register_user(username, password):
+    try:
+        conn = connect()
+        c = conn.cursor()
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        conn.commit()
+        return True
+    except sqlite3.IntegrityError:
+        return False
+    finally:
+        conn.close()
+
+# Fungsi login user
+def login_user(username, password):
+    conn = connect()
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE username = ? AND password = ?", (username, password))
+    user = c.fetchone()
+    conn.close()
+    return user[0] if user else None
+
+# Fungsi untuk menyimpan riwayat deteksi
+def simpan_riwayat(user_id, image_name, image_detected, hasil, rincian, waktu=None):
+    conn = connect()
+    c = conn.cursor()
+    if waktu is None:
+        waktu = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    c.execute("""
+        INSERT INTO riwayat (user_id, image_name, image_detected, hasil, rincian, waktu)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (user_id, image_name, image_detected, hasil, rincian, waktu))
+    conn.commit()
+    conn.close()
+
+# Fungsi mengambil seluruh riwayat berdasarkan user_id
+def ambil_riwayat(user_id):
+    conn = connect()
+    c = conn.cursor()
+    c.execute("""
+        SELECT id, image_detected, hasil, rincian, waktu 
+        FROM riwayat 
+        WHERE user_id = ? 
+        ORDER BY id ASC
+    """, (user_id,))
+    rows = c.fetchall()
+    conn.close()
+    return rows
 
 # Function for styling the app with a girly theme
 def girly_style():
@@ -46,14 +131,7 @@ def sidebar_header():
 # Home page content
 def home_page():
     st.title("🌳 Guava Disease Detector")
-    st.markdown("""
-    <style>
-        .big-font {
-            font-size:20px !important;
-        }
-    </style>
-    """, unsafe_allow_html=True)
-
+    st.markdown("""<style>.big-font { font-size:20px !important; }</style>""", unsafe_allow_html=True)
     st.markdown('<div class="big-font">Selamat datang di <b>Guava Disease Detector</b>! Aplikasi ini dirancang untuk membantu Anda mengidentifikasi penyakit pada buah <b>jambu biji</b> secara otomatis menggunakan teknologi <i>YOLOv11</i>.</div>', unsafe_allow_html=True)
 
     st.image("images/detection.png", caption="Contoh Deteksi Penyakit pada Jambu Biji", width=600)
@@ -86,113 +164,79 @@ def home_page():
     - 📧 **Email**: chisiliaamanda123@gmail.com  
     - 🗂️ **GitHub**: [chisiliaamanda/guava-disease-detector](https://github.com/chisiliaamanda/guava-disease-detector)
     """)
-    
+
 # Detection page content
 def detection_page():
-    st.title("🔍 Deteksi Penyakit Jambu")
+    st.title("🔍 Deteksi Penyakit pada Jambu Biji")
 
-    ROOT = Path(__file__).parent
-    IMAGES_DIR = ROOT / 'images'
-    MODEL_DIR = ROOT / 'weights'
-    JSON_PATH = ROOT / 'penyakit_jambu_info.json'
+    # Cek login terlebih dahulu
+    if 'user_id' not in st.session_state:
+        st.session_state['user_id'] = login_user("admin", "123")  # Ganti dengan sistem login yang sesuai
 
-    DEFAULT_IMAGE = IMAGES_DIR / 'jambu2.jpg'
-    DEFAULT_RESULT = IMAGES_DIR / 'detectedimage1.png'
-    DETECTION_MODEL = MODEL_DIR / 'best.pt'
+    metode = st.radio("Pilih Metode Input Gambar:", ["📁 Unggah Gambar", "📷 Gunakan Kamera"])
+    confidence = st.slider("Tingkat Kepercayaan (Confidence)", 10, 100, 30) / 100
 
-    confidence = st.sidebar.slider("Confidence", 10, 100, 25) / 100
-    input_mode = st.sidebar.radio("Sumber Gambar", ["Image", "Video", "Camera"])
+    # Load the model
+    model = YOLO("weights/best.pt")  # Gantilah dengan path yang sesuai untuk model YOLO
 
-    try:
-        model = YOLO(DETECTION_MODEL)
-        st.sidebar.success("✅ Model berhasil dimuat")
-    except Exception as e:
-        st.error(f"❌ Gagal memuat model: {e}")
-        return
+    image = None
+    filename = None
 
-    st.sidebar.markdown("### 🏷️ Label:")
-    for i, name in model.names.items():
-        st.sidebar.write(f"{i}: {name}")
+    if metode == "📁 Unggah Gambar":
+        uploaded_file = st.file_uploader("Unggah gambar jambu biji", type=["jpg", "png", "jpeg"])
+        if uploaded_file:
+            image = Image.open(uploaded_file).convert("RGB")
+            filename = uploaded_file.name
+    else:
+        camera_image = st.camera_input("Ambil gambar dengan kamera")
+        if camera_image:
+            image = Image.open(camera_image).convert("RGB")
+            filename = f"kamera_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
 
-    if 'history' not in st.session_state:
-        st.session_state.history = []
+    if image:
+        st.image(image, caption="Gambar Input", width=600)
 
-    def tampilkan_penjelasan(label_list):
-        try:
-            with open(JSON_PATH, "r", encoding="utf-8") as f:
-                info = json.load(f)
-            for label in label_list:
-                st.info(f"**{label}**: {info.get(label, 'Info tidak tersedia')}")
-        except:
-            st.warning("🔍 File penjelasan tidak ditemukan")
+        if st.button("🔍 Jalankan Deteksi"):
+            with st.spinner("Sedang mendeteksi..."):
+                result = model.predict(image, conf=confidence)
+                output_image = result[0].plot()[:, :, ::-1]
+                st.image(output_image, caption="Hasil Deteksi", width=600)
 
-    if input_mode == "Image":
-        uploaded = st.sidebar.file_uploader("Unggah Gambar", type=["jpg", "jpeg", "png"])
-        col1, col2 = st.columns(2)
-
-        with col1:
-            if uploaded:
-                img = Image.open(uploaded)
-            elif DEFAULT_IMAGE.exists():
-                img = Image.open(DEFAULT_IMAGE)
-            else:
-                st.warning("Tidak ada gambar.")
-                return
-            st.image(img, caption="Gambar Input", use_container_width=True)
-
-        with col2:
-            if st.sidebar.button("🔎 Deteksi Objek"):
-                result = model.predict(img, conf=confidence)
                 boxes = result[0].boxes
-                hasil = result[0].plot()[:, :, ::-1]
-                st.image(hasil, caption="Hasil Deteksi", use_container_width=True)
+                labels = []
+                label_details = []
 
-                detected_labels = []
                 for box in boxes:
                     cls_id = int(box.cls[0].item())
-                    label = model.names.get(cls_id, "Unknown")
-                    detected_labels.append(label)
+                    label = model.model.names.get(cls_id, "Unknown")
+                    conf_score = box.conf[0].item() * 100
+                    labels.append(label)
+                    label_details.append(f"- {label} ({conf_score:.2f}%)")
 
-                tampilkan_penjelasan(set(detected_labels))
+                hasil_deteksi = ", ".join(set(labels)) if labels else "Tidak ada penyakit terdeteksi"
+                total_objek = len(labels)
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-                st.session_state.history.append({
-                    'type': 'Image',
-                    'input_img': np.array(img.convert("RGB")).tolist(),
-                    'result_img': hasil.tolist(),
-                    'labels': detected_labels
-                })
+                st.success(f"Hasil Deteksi: {hasil_deteksi}")
+                st.info(f"Jumlah Objek Terdeteksi: {total_objek}")
+                if labels:
+                    st.write("📋 Rincian Deteksi:")
+                    for item in label_details:
+                        st.markdown(item)
+                st.write(f"🕒 Waktu Deteksi: {timestamp}")
 
-    elif input_mode == "Video":
-        video = st.sidebar.file_uploader("Unggah Video", type=["mp4", "mov"])
-        if video:
-            tfile = tempfile.NamedTemporaryFile(delete=False)
-            tfile.write(video.read())
-            cap = cv2.VideoCapture(tfile.name)
-            stframe = st.empty()
-            while cap.isOpened():
-                ret, frame = cap.read()
-                if not ret:
-                    break
-                result = model(frame[..., ::-1], conf=confidence)
-                plotted = result[0].plot()
-                stframe.image(plotted, channels="RGB")
-            cap.release()
+                # Simpan hasil ke folder riwayat
+                RIWAYAT_FOLDER = Path(__file__).parent / "riwayat"
+                if not RIWAYAT_FOLDER.exists():
+                    RIWAYAT_FOLDER.mkdir(parents=True)
 
-    elif input_mode == "Camera":
-        camera_img = st.camera_input("📷 Ambil foto dari kamera")
-        if camera_img:
-            img = Image.open(camera_img)
-            result = model.predict(img, conf=confidence)
-            plotted = result[0].plot()[:, :, ::-1]
-            st.image(plotted, caption="Hasil Deteksi", use_container_width=True)
+                image_path = os.path.join(RIWAYAT_FOLDER, filename)
+                image.save(image_path)
 
-            # Simpan ke history
-            st.session_state.history.append({
-                'type': 'Camera',
-                'input_img': np.array(img.convert("RGB")).tolist(),
-                'result_img': plotted.tolist(),
-                'labels': [model.names[int(box.cls[0].item())] for box in result[0].boxes]
-            })
+                # Simpan riwayat ke database
+                if 'user_id' in st.session_state:
+                    simpan_riwayat(st.session_state['user_id'], filename, hasil_deteksi, timestamp)
+                    st.info("Riwayat deteksi telah disimpan.")
 
 # History page content
 def history_page():

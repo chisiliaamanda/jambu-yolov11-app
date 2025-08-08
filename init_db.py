@@ -1,26 +1,42 @@
 import sqlite3
+from datetime import datetime
 
-conn = sqlite3.connect('users.db')
-c = conn.cursor()
+DB_NAME = "db_jambu.sqlite"
 
-c.execute('''
-CREATE TABLE IF NOT EXISTS users (
-    username TEXT PRIMARY KEY,
-    password TEXT NOT NULL
-)
-''')
+# Fungsi koneksi ke database
+def connect():
+    return sqlite3.connect(DB_NAME)
 
-# Hapus user lama (opsional)
-c.execute('DELETE FROM users')
+# Membuat tabel jika belum ada
+def create_tables():
+    conn = connect()
+    c = conn.cursor()
 
-# Tambah user default
-users = [
-    ('admin', '123'),
-    ('user1', 'pass1'),
-]
+    # Tabel users
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT
+    )
+    """)
 
-c.executemany('INSERT INTO users (username, password) VALUES (?, ?)', users)
+    # Tabel riwayat (versi lengkap dengan image hasil deteksi dan rincian)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS riwayat (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        image_name TEXT,
+        image_detected TEXT,
+        hasil TEXT,
+        rincian TEXT,
+        waktu TEXT
+    )
+    """)
 
-conn.commit()
-conn.close()
-print("Database users.db sudah siap dengan user default.")
+    conn.commit()
+    conn.close()
+    print("Tabel berhasil dibuat atau sudah ada.")  # Menambahkan feedback
+
+# Jalankan fungsi create_tables untuk inisialisasi database
+create_tables()
