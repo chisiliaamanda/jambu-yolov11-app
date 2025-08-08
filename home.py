@@ -294,8 +294,11 @@ def history_page():
 def main():
     girly_style()
     sidebar_header()
-    menu = st.sidebar.radio("📌 Menu", ["Home", "Detection", "History"])
-    if menu == "Home":
+    menu = st.sidebar.radio("📌 Menu", ["Login", "Home", "Detection", "History"])
+
+    if menu == "Login":
+        login_page()
+    elif menu == "Home":
         home_page()
     elif menu == "Detection":
         detection_page()
