@@ -127,48 +127,66 @@ def sidebar_header():
     st.sidebar.markdown("---")
     st.sidebar.caption("👩‍💻 Oleh Chisilia Amanda Wahyudi | Skripsi Deteksi Penyakit Jambu 🍈")
 
+# Halaman Login
+def login_page():
+    st.title("🔑 Login")
+
+    # Form login
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        user_id = login_user(username, password)
+        if user_id:
+            st.session_state['user_id'] = user_id
+            st.success("Login berhasil!")
+            st.experimental_rerun()  # Refresh untuk akses ke halaman Deteksi
+        else:
+            st.error("Username atau Password salah.")
+
+# Halaman Register
+def register_page():
+    st.title("📝 Register")
+
+    # Form register
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    confirm_password = st.text_input("Confirm Password", type="password")
+
+    if st.button("Register"):
+        if password == confirm_password:
+            if register_user(username, password):
+                st.success("Registrasi berhasil!")
+                st.session_state['user_id'] = login_user(username, password)  # Auto login setelah registrasi
+                st.experimental_rerun()  # Refresh untuk akses ke halaman Deteksi
+            else:
+                st.error("Username sudah terdaftar.")
+        else:
+            st.error("Password tidak cocok.")
+
 # Home page content
 def home_page():
     st.title("🌳 Guava Disease Detector")
-    st.markdown("""<style>.big-font { font-size:20px !important; }</style>""", unsafe_allow_html=True)
-    st.markdown('<div class="big-font">Selamat datang di <b>Guava Disease Detector</b>! Aplikasi ini dirancang untuk membantu Anda mengidentifikasi penyakit pada buah <b>jambu biji</b> secara otomatis menggunakan teknologi <i>YOLOv11</i>.</div>', unsafe_allow_html=True)
 
-    st.image("images/detection.png", caption="Contoh Deteksi Penyakit pada Jambu Biji", width=600)
-
-    st.subheader("🧠 Tentang Aplikasi")
-    st.write("""Aplikasi berbasis web yang memanfaatkan model YOLOv11 untuk mendeteksi penyakit pada permukaan buah jambu biji. Sistem mendukung input dari gambar maupun kamera.""")
-
-    st.subheader("🔍 Fitur Utama")
-    st.markdown("""
-    - ✅ Deteksi cepat dan akurat menggunakan YOLOv11.
-    - 🖼️ Tampilan hasil deteksi dengan bounding box dan confidence.
-    - 🕒 Riwayat deteksi tersimpan per pengguna.
-    """)
-
-    st.subheader("📌 Cara Menggunakan")
-    st.markdown("""
-    1. Masuk ke menu **🔍 Deteksi**.
-    2. Pilih metode input: upload atau kamera.
-    3. Jalankan deteksi dan lihat hasilnya.
-    4. Cek kembali melalui menu **📜 Riwayat**.
-    """)
-
-    st.subheader("📞 Tentang Pengembang")
-    st.markdown("""
-    - 👩‍💻 **Nama**: Chisilia Amanda  
-    - 🏫 **Universitas**: Universitas Gunadarma  
-    - 📧 **Email**: chisiliaamanda123@gmail.com  
-    - 🗂️ **GitHub**: [chisiliaamanda/guava-disease-detector](https://github.com/chisiliaamanda/guava-disease-detector)
-    """)
+    if 'user_id' not in st.session_state:
+        page = st.selectbox("Pilih halaman", ["Login", "Register"])
+        if page == "Login":
+            login_page()
+        elif page == "Register":
+            register_page()
+    else:
+        st.markdown("Selamat datang! Anda telah login.")
+        st.markdown("Pilih menu berikut:")
+        st.radio("Menu", ["Detection", "History"])
 
 # Detection page content
 def detection_page():
-    st.title("🔍 Deteksi Penyakit pada Jambu Biji")
-
     # Cek login terlebih dahulu
     if 'user_id' not in st.session_state:
-        st.session_state['user_id'] = login_user("admin", "123")  # Ganti dengan sistem login yang sesuai
+        st.error("Anda perlu login terlebih dahulu.")
+        st.stop()  # Menghentikan eksekusi jika belum login
 
+    st.title("🔍 Deteksi Penyakit pada Jambu Biji")
     metode = st.radio("Pilih Metode Input Gambar:", ["📁 Unggah Gambar", "📷 Gunakan Kamera"])
     confidence = st.slider("Tingkat Kepercayaan (Confidence)", 10, 100, 30) / 100
 
@@ -236,6 +254,11 @@ def detection_page():
 
 # History page content
 def history_page():
+    # Cek login terlebih dahulu
+    if 'user_id' not in st.session_state:
+        st.error("Anda perlu login terlebih dahulu.")
+        st.stop()  # Menghentikan eksekusi jika belum login
+
     st.title("📜 Riwayat Deteksi")
     if 'history' not in st.session_state or not st.session_state.history:
         st.info("Belum ada deteksi yang disimpan.")
