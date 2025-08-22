@@ -127,25 +127,61 @@ def ambil_riwayat_db(user_id):
 def girly_style():
     st.markdown("""
     <style>
+      /* 🔥 Hapus background putih default */
+      .stApp {
+        background: linear-gradient(135deg, #ffb6c1, #ff80ab, #f48fb1) !important;
+      }
       .block-container { 
-        background: linear-gradient(135deg, #ffe4e6, #f8bbd0)!important; 
-        border-radius: 16px; 
+        background: transparent !important; 
         padding: 2rem; 
       }
-      [data-testid="stSidebar"] { 
-        background: linear-gradient(135deg, #ff80ab, #f48fb1); 
-        color: #4a148c; 
-      }
-      .stButton>button { border-radius: 12px; font-weight: 600; }
-      .big-font { font-size: 1.05rem; line-height: 1.6; }
-      .dashed { border: 2px dashed #ec407a; padding: 1rem; border-radius: 12px; background: #fff3f7; }
-      .codebox { background: #fff; border: 1px solid #ffc1e3; border-radius: 10px; padding: 0.75rem 1rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
 
-      /* 🎯 khusus caption di sidebar */
-      [data-testid="stSidebar"] .stCaption, 
-      [data-testid="stSidebar"] p.st-emotion-cache-0, 
-      [data-testid="stSidebar"] .stMarkdown p { 
-        color: black !important; 
+      /* Sidebar */
+      [data-testid="stSidebar"] { 
+        background: linear-gradient(135deg, #ff80ab, #f48fb1) !important; 
+        color: black !important;
+      }
+
+      /* Card, box, widget */
+      .stTextInput > div > div > input,
+      .stSelectbox > div > div,
+      .stButton > button,
+      .stFileUploader,
+      .stRadio > div,
+      .stMarkdown,
+      .stExpander,
+      .stTextArea > div > textarea {
+        background-color: #ffe4ec !important; 
+        color: #000 !important;
+        border: 1px solid #ec407a !important;
+        border-radius: 12px !important;
+      }
+
+      /* Tombol */
+      .stButton>button {
+        background: #ec407a !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-weight: bold !important;
+      }
+      .stButton>button:hover {
+        background: #d81b60 !important;
+        color: white !important;
+      }
+
+      /* Font besar */
+      .big-font { 
+        font-size: 1.1rem; 
+        line-height: 1.6; 
+        color: #4a0d36;
+      }
+
+      /* Expander */
+      .stExpander {
+        background: #ffc1e3 !important;
+        border: 1px solid #ec407a !important;
+        border-radius: 10px !important;
       }
     </style>
     """, unsafe_allow_html=True)
