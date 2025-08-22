@@ -127,9 +127,9 @@ def ambil_riwayat_db(user_id):
 def girly_style():
     st.markdown("""
     <style>
-      /* 🔥 Hapus background putih default */
+      /* 🌸 Background utama */
       .stApp {
-        background: linear-gradient(135deg, #ffb6c1, #ff80ab, #f48fb1) !important;
+        background: linear-gradient(135deg, #ffdde1, #ee9ca7) !important;
       }
       .block-container { 
         background: transparent !important; 
@@ -138,53 +138,57 @@ def girly_style():
 
       /* Sidebar */
       [data-testid="stSidebar"] { 
-        background: linear-gradient(135deg, #ff80ab, #f48fb1) !important; 
-        color: black !important;
+        background: linear-gradient(135deg, #f48fb1, #ff80ab) !important; 
+        color: white !important;
       }
 
-      /* Card, box, widget */
+      /* Input, widget, dll */
       .stTextInput > div > div > input,
       .stSelectbox > div > div,
-      .stButton > button,
       .stFileUploader,
       .stRadio > div,
       .stMarkdown,
       .stExpander,
       .stTextArea > div > textarea {
-        background-color: #ffe4ec !important; 
-        color: #000 !important;
-        border: 1px solid #ec407a !important;
-        border-radius: 12px !important;
+        background-color: rgba(255, 255, 255, 0.7) !important; 
+        color: #4a0d36 !important;
+        border: none !important;
+        border-radius: 14px !important;
+        padding: 0.6rem !important;
       }
 
       /* Tombol */
       .stButton>button {
-        background: #ec407a !important;
+        background: linear-gradient(135deg, #ff80ab, #f48fb1) !important;
         color: white !important;
         border: none !important;
-        border-radius: 12px !important;
+        border-radius: 14px !important;
         font-weight: bold !important;
+        padding: 0.5rem 1.2rem !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       }
       .stButton>button:hover {
-        background: #d81b60 !important;
-        color: white !important;
+        background: linear-gradient(135deg, #f06292, #ec407a) !important;
+        transform: scale(1.03);
+        transition: 0.2s ease-in-out;
       }
 
       /* Font besar */
       .big-font { 
-        font-size: 1.1rem; 
+        font-size: 1.15rem; 
         line-height: 1.6; 
         color: #4a0d36;
       }
 
       /* Expander */
       .stExpander {
-        background: #ffc1e3 !important;
-        border: 1px solid #ec407a !important;
-        border-radius: 10px !important;
+        background: rgba(255, 192, 224, 0.4) !important;
+        border: none !important;
+        border-radius: 12px !important;
       }
     </style>
     """, unsafe_allow_html=True)
+
 
 # --------- Auth UI ----------
 def logout_user():
