@@ -127,12 +127,26 @@ def ambil_riwayat_db(user_id):
 def girly_style():
     st.markdown("""
     <style>
-      .block-container { background: linear-gradient(135deg, #ffe4e6, #f8bbd0)!important; border-radius: 16px; padding: 2rem; }
-      [data-testid="stSidebar"] { background: linear-gradient(135deg, #ff80ab, #f48fb1); color: #4a148c; }
+      .block-container { 
+        background: linear-gradient(135deg, #ffe4e6, #f8bbd0)!important; 
+        border-radius: 16px; 
+        padding: 2rem; 
+      }
+      [data-testid="stSidebar"] { 
+        background: linear-gradient(135deg, #ff80ab, #f48fb1); 
+        color: #4a148c; 
+      }
       .stButton>button { border-radius: 12px; font-weight: 600; }
       .big-font { font-size: 1.05rem; line-height: 1.6; }
       .dashed { border: 2px dashed #ec407a; padding: 1rem; border-radius: 12px; background: #fff3f7; }
       .codebox { background: #fff; border: 1px solid #ffc1e3; border-radius: 10px; padding: 0.75rem 1rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+      /* 🎯 khusus caption di sidebar */
+      [data-testid="stSidebar"] .stCaption, 
+      [data-testid="stSidebar"] p.st-emotion-cache-0, 
+      [data-testid="stSidebar"] .stMarkdown p { 
+        color: black !important; 
+      }
     </style>
     """, unsafe_allow_html=True)
 
@@ -181,19 +195,26 @@ def register_page():
 # --------- Home ----------
 def home_page():
     st.title("🌳 Guava Disease Detector")
+
+    # kalau belum login -> tampilkan dropdown Login/Register
     if not st.session_state.get("logged_in"):
-        tab = st.tabs(["Login", "Register"])
-        with tab[0]: login_page()
-        with tab[1]: register_page()
+        pilihan = st.selectbox("Silakan pilih menu:", ["🔑 Login", "📝 Register"])
+        if pilihan == "🔑 Login":
+            login_page()
+        else:
+            register_page()
         return
 
+    # kalau sudah login -> tampilkan halaman utama
     st.markdown(
         '<div class="big-font">Selamat datang di <b>Guava Disease Detector</b>! '
         'Aplikasi ini mengidentifikasi penyakit pada <b>jambu biji</b> menggunakan <i>YOLOv11</i>.</div>',
         unsafe_allow_html=True,
     )
     demo_img = Path("images/detection.png")
-    if demo_img.exists(): st.image(str(demo_img), caption="Contoh Deteksi Penyakit pada Jambu Biji", width=HOME_DEMO_WIDTH)
+    if demo_img.exists():
+        st.image(str(demo_img), caption="Contoh Deteksi Penyakit pada Jambu Biji", width=HOME_DEMO_WIDTH)
+
     st.subheader("🧠 Tentang Aplikasi")
     st.write("Mendeteksi penyakit pada permukaan buah jambu biji dari unggahan atau kamera.")
     st.subheader("🔍 Fitur Utama")
