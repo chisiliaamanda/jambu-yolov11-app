@@ -127,68 +127,28 @@ def ambil_riwayat_db(user_id):
 def girly_style():
     st.markdown("""
     <style>
-      /* 🌸 Background utama */
-      .stApp {
-        background: linear-gradient(135deg, #ffdde1, #ee9ca7) !important;
-      }
       .block-container { 
-        background: transparent !important; 
+        background: linear-gradient(135deg, #ffe4e6, #f8bbd0)!important; 
+        border-radius: 16px; 
         padding: 2rem; 
       }
-
-      /* Sidebar */
       [data-testid="stSidebar"] { 
-        background: linear-gradient(135deg, #f48fb1, #ff80ab) !important; 
-        color: white !important;
+        background: linear-gradient(135deg, #ff80ab, #f48fb1); 
+        color: #4a148c; 
       }
+      .stButton>button { border-radius: 12px; font-weight: 600; }
+      .big-font { font-size: 1.05rem; line-height: 1.6; }
+      .dashed { border: 2px dashed #ec407a; padding: 1rem; border-radius: 12px; background: #fff3f7; }
+      .codebox { background: #fff; border: 1px solid #ffc1e3; border-radius: 10px; padding: 0.75rem 1rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
 
-      /* Input, widget, dll */
-      .stTextInput > div > div > input,
-      .stSelectbox > div > div,
-      .stFileUploader,
-      .stRadio > div,
-      .stMarkdown,
-      .stExpander,
-      .stTextArea > div > textarea {
-        background-color: rgba(255, 255, 255, 0.7) !important; 
-        color: #4a0d36 !important;
-        border: none !important;
-        border-radius: 14px !important;
-        padding: 0.6rem !important;
-      }
-
-      /* Tombol */
-      .stButton>button {
-        background: linear-gradient(135deg, #ff80ab, #f48fb1) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 14px !important;
-        font-weight: bold !important;
-        padding: 0.5rem 1.2rem !important;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      }
-      .stButton>button:hover {
-        background: linear-gradient(135deg, #f06292, #ec407a) !important;
-        transform: scale(1.03);
-        transition: 0.2s ease-in-out;
-      }
-
-      /* Font besar */
-      .big-font { 
-        font-size: 1.15rem; 
-        line-height: 1.6; 
-        color: #4a0d36;
-      }
-
-      /* Expander */
-      .stExpander {
-        background: rgba(255, 192, 224, 0.4) !important;
-        border: none !important;
-        border-radius: 12px !important;
+      /* 🎯 khusus caption di sidebar */
+      [data-testid="stSidebar"] .stCaption, 
+      [data-testid="stSidebar"] p.st-emotion-cache-0, 
+      [data-testid="stSidebar"] .stMarkdown p { 
+        color: black !important; 
       }
     </style>
     """, unsafe_allow_html=True)
-
 
 # --------- Auth UI ----------
 def logout_user():
@@ -247,22 +207,84 @@ def home_page():
 
     # kalau sudah login -> tampilkan halaman utama
     st.markdown(
-        '<div class="big-font">Selamat datang di <b>Guava Disease Detector</b>! '
-        'Aplikasi ini mengidentifikasi penyakit pada <b>jambu biji</b> menggunakan <i>YOLOv11</i>.</div>',
+        """
+        <div style="font-size:20px; line-height:1.6;">
+        Selamat datang di <b>Guava Disease Detector</b>!<br><br>
+        Aplikasi ini membantu <b>petani</b>, <b>peneliti</b>, maupun <b>masyarakat umum</b> 
+        untuk mendeteksi penyakit pada <b>buah jambu biji</b> secara cepat dan akurat menggunakan 
+        model <i>YOLOv11</i> berbasis <i>Computer Vision</i>.
+        </div>
+        """,
         unsafe_allow_html=True,
     )
+
     demo_img = Path("images/detection.png")
     if demo_img.exists():
         st.image(str(demo_img), caption="Contoh Deteksi Penyakit pada Jambu Biji", width=HOME_DEMO_WIDTH)
 
+    # Tentang aplikasi
     st.subheader("🧠 Tentang Aplikasi")
-    st.write("Mendeteksi penyakit pada permukaan buah jambu biji dari unggahan atau kamera.")
+    st.write(
+        """
+        Guava Disease Detector dikembangkan untuk mendukung digitalisasi di bidang pertanian,
+        khususnya dalam menjaga kualitas hasil panen jambu biji. 
+        Dengan aplikasi ini, Anda dapat:
+        - Mengunggah gambar buah jambu biji atau menggunakan kamera langsung.
+        - Mendeteksi jenis penyakit pada permukaan buah.
+        - Menyimpan riwayat deteksi untuk analisis lanjutan.
+        """
+    )
+
+    # Fitur utama
     st.subheader("🔍 Fitur Utama")
-    st.markdown("- ✅ YOLOv11\n- 🖼️ Bounding box + confidence\n- 🕒 Riwayat per pengguna\n- 📷 Upload atau kamera")
+    st.markdown(
+        """
+        - ✅ **YOLOv11** untuk deteksi objek yang cepat dan presisi.  
+        - 🖼️ Visualisasi hasil berupa *bounding box* dan tingkat kepercayaan (*confidence score*).  
+        - 🕒 Riwayat hasil deteksi per pengguna (tersimpan otomatis).  
+        - 📷 Fleksibel: unggah gambar atau gunakan kamera perangkat.  
+        - 📊 Laporan singkat tiap deteksi.  
+        """
+    )
+
+    # Cara menggunakan
     st.subheader("📌 Cara Menggunakan")
-    st.markdown("1) Buka **Detection** · 2) Pilih sumber gambar · 3) Jalankan deteksi · 4) Cek **History**")
-    with st.expander("ℹ️ Info Singkat Penyakit"):
-        st.markdown("- **Phytophthora**: bercak coklat kehitaman\n- **Styler & Root**: di ujung stylar/akar\n- **Scab**: bintik kasar")
+    st.markdown(
+        """
+        1. Masuk ke menu **Detection**.  
+        2. Pilih sumber gambar: unggah file atau ambil dari kamera.  
+        3. Jalankan proses deteksi.  
+        4. Hasil deteksi akan muncul beserta detail confidence dan kelas penyakit.  
+        5. Riwayat deteksi bisa dilihat kembali di menu **History**.  
+        """
+    )
+
+    # Info penyakit lebih detail
+    with st.expander("ℹ️ Info Singkat Penyakit pada Jambu Biji"):
+        st.markdown(
+            """
+            - **Phytophthora** 🟤  
+              Ditandai bercak coklat kehitaman yang meluas dan membuat buah cepat busuk.  
+
+            - **Styler & Root** 🌱  
+              Infeksi biasanya muncul di ujung stylar/akar buah, menimbulkan bercak gelap kecil.  
+
+            - **Scab** ⚪  
+              Tampak sebagai bintik kasar, agak menonjol, dan membuat permukaan buah tidak mulus.  
+            """
+        )
+
+    # Manfaat
+    st.subheader("🌟 Manfaat")
+    st.markdown(
+        """
+        - 💡 Membantu petani mengenali penyakit lebih cepat.  
+        - 📉 Mengurangi kerugian hasil panen.  
+        - 🧪 Mendukung penelitian di bidang pertanian digital.  
+        - 📲 Bisa digunakan langsung dari perangkat apapun.  
+        """
+    )
+
 
 # --------- NMS sederhana ----------
 def iou_xyxy(a, b):
