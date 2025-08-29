@@ -449,21 +449,23 @@ def detection_page():
     model: YOLO = st.session_state["yolo_model"]
 
     metode = st.radio("Pilih Metode Input Gambar:", ["📁 Unggah Gambar", "📷 Gunakan Kamera"])
-    # slider yang wajar; default 0.25
-    base_conf = st.slider("Tingkat Kepercayaan (Confidence)", 10, 100, 32) / 100.0
+    # default 0.25 biar lebih longgar
+    base_conf = st.slider("Tingkat Kepercayaan (Confidence)", 10, 100, 25) / 100.0
 
-    image = None; input_filename = None
+    image = None; input_filename = None; sumber = None
     if metode == "📁 Unggah Gambar":
         uploaded_file = st.file_uploader("Unggah gambar jambu biji", type=["jpg","jpeg","png"])
         if uploaded_file:
             image = Image.open(uploaded_file).convert("RGB")
             input_filename = uploaded_file.name
+            sumber = "upload"
             st.image(image, caption="Gambar Input", width=INPUT_IMG_WIDTH)
     else:
         camera_image = st.camera_input("Ambil gambar dengan kamera")
         if camera_image:
             image = Image.open(camera_image).convert("RGB")
             input_filename = f"kamera_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
+            sumber = "kamera"
             st.image(image, caption="Gambar Input", width=INPUT_IMG_WIDTH)
 
     if image is not None:
@@ -472,21 +474,26 @@ def detection_page():
                 try:
                     img_np = np.array(image); H, W = img_np.shape[:2]
 
-                    # Inference stabil (tidak agresif, tapi cukup detail)
+                    # Inference YOLO langsung
                     result = model.predict(
                         img_np,
-                        conf=base_conf,   # digabung dengan per-kelas
-                        iou=0.45,         # lebih menekan overlap (lebih sedikit boks)
-                        imgsz=1280,       # tetap detail tanpa over
+                        conf=base_conf,
+                        iou=0.45,
+                        imgsz=640,       # lebih stabil, tidak terlalu besar
                         augment=False,
                         agnostic_nms=False,
                         max_det=200,
                         verbose=False
                     )
 
+                    # Ambil box dari hasil YOLO
                     boxes = filter_predictions(result, W, H, base_conf=base_conf)
-                    boxes = color_texture_filter(img_np, boxes)   # saringan ringan anti-FP
-                    boxes = nms_merge(boxes, thr=0.6)             # dedupe akhir
+
+                    # Gunakan filter warna/tekstur hanya untuk upload
+                    if sumber == "upload":
+                        boxes = color_texture_filter(img_np, boxes)
+
+                    boxes = nms_merge(boxes, thr=0.6)
 
                     if not boxes:
                         st.warning("Tidak terdeteksi objek. Coba turunkan sedikit confidence atau ambil foto lebih terang/dekat.")
@@ -502,7 +509,7 @@ def detection_page():
                     plotted = draw_boxes_pil(image, boxes)
                     st.image(plotted, caption="Hasil Deteksi", width=RESULT_IMG_WIDTH)
 
-                    # Ringkasan + rincian
+                    # Ringkasan hasil
                     kelas_list = [b[5] for b in boxes]
                     kelas_unique = []
                     for k in kelas_list:
@@ -537,6 +544,7 @@ def detection_page():
                     st.success("Hasil deteksi berhasil disimpan ke riwayat.")
                 except Exception as e:
                     st.error(f"Gagal mendeteksi: {e}")
+
 
 # --------- Halaman History ----------
 def history_page():
